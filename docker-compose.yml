@@ -1,0 +1,28 @@
+version: '2'
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - /etc/nginx/conf.d
+      - /var/www
+    networks:
+      - proxy-tier
+    restart: unless-stopped
+
+  dockergen:
+    image: jwilder/docker-gen
+    command: -config /etc/docker-gen/configs/docker-gen.cfg
+    volumes_from:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./templates:/etc/docker-gen/templates
+      - ./configs:/etc/docker-gen/configs
+
+networks:
+  proxy-tier:
+    external:
+      name: nginx-proxy
